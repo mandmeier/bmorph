@@ -76,8 +76,7 @@ class Biomorph:
         for child in range(n):
             mutant = Biomorph(
                 self.branchings + pick_random([-1, 0, 0, 0, +1]),
-                # + math.radians(pick_random([-20, -10, 0, 10, 20])),
-                self.angle,
+                self.angle + math.radians(pick_random([-20, -10, 0, 10, 20])),
                 self.stem_length *
                 (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
                 self.shrink_factor *
@@ -87,8 +86,6 @@ class Biomorph:
                 self.squeeze_y *
                 (1 + pick_random([-0.2, -0.1, 0, 0.1, 0.2])),
             )
-            print("TEST")
-            print(self.angle)
             mutant.generation = self.generation + 1
             mutant.name = f'gen{mutant.generation}_ch{child+1}'
             if child == 0:
@@ -124,8 +121,8 @@ parent = Biomorph(
 
 children = parent.create_children()
 
-for ch in children:
-    print(ch.genome())
+#for ch in children:
+    #print(ch.genome())
 
 running = True
 while running:
