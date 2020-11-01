@@ -25,8 +25,64 @@ pos7 = (width / 6, 5 * height / 6 + shift)
 pos8 = (width / 2, 5 * height / 6 + shift)
 pos9 = (5 * width / 6, 5 * height / 6 + shift)
 
-btn_positions = [pos1,pos2,pos3,pos4,pos6,pos7,pos8,pos9]
+btn_positions = [pos1, pos2, pos3, pos4, pos6, pos7, pos8, pos9]
 
+
+def draw_ellipse(A, B, width, color, line):
+    """
+    draws ellipse between two points
+    A = start point (x,y)
+    B = end point (x,y)
+    width in pixel
+    color (r,g,b)
+    line thickness int, if line=0 fill ellipse
+    """
+    # point coordinates
+    xA, yA = A[0], A[1]
+    xB, yB = B[0], B[1]
+    # calculate ellipse height, distance between A and B
+    AB = math.sqrt((xB - xA)**2 + (yB - yA)**2)
+
+    # difference between corner point coord and ellipse endpoint
+    def sp(theta):
+        return abs((width / 2 * math.sin(math.radians(theta))))
+
+    def cp(theta):
+        return abs((width / 2 * math.cos(math.radians(theta))))
+
+    if xB >= xA and yB < yA:
+        # NE quadrant
+        theta = math.degrees(math.asin((yA - yB) / AB))
+        xP = int(xA - sp(theta))
+        yP = int(yB - cp(theta))
+    elif xB < xA and yB <= yA:
+        # NW
+        theta = math.degrees(math.asin((yB - yA) / AB))
+        xP = int(xB - sp(theta))
+        yP = int(yB - cp(theta))
+    elif xB <= xA and yB > yA:
+        # SW
+        theta = math.degrees(math.asin((yB - yA) / AB))
+        xP = int(xB - sp(theta))
+        yP = int(yA - cp(theta))
+    else:
+        # SE
+        theta = math.degrees(math.asin((yA - yB) / AB))
+        xP = int(xA - sp(theta))
+        yP = int(yA - cp(theta))
+
+    # create surface for ellipse
+    ellipse_surface = pygame.Surface((AB, width), pygame.SRCALPHA)
+    # draw surface onto ellipse
+    if width < 2 * line:
+        width = 2 * line
+    if AB < 2 * line:
+        AB = 2 * line
+    pygame.draw.ellipse(ellipse_surface, color, (0, 0, AB, width), line)
+    # rotate ellipse
+    ellipse = pygame.transform.rotate(ellipse_surface, theta)
+    # blit ellipse onto screen
+    screen.blit(ellipse, (xP, yP))
 
 
 def FractalTree(branchings, angle, stem_length, shrink_factor, squeeze_x, squeeze_y, start_pos, direction=-math.pi / 2, color=black):
@@ -35,7 +91,12 @@ def FractalTree(branchings, angle, stem_length, shrink_factor, squeeze_x, squeez
     angle_y = stem_length * math.sin(direction)
     (x, y) = start_pos
     next_position = (x + angle_x * squeeze_x, y + angle_y * squeeze_y)
-    pygame.draw.line(screen, color, start_pos, next_position, 2)
+
+    ellipse_outline_width = 2
+    ellipse_width = stem_length / 3
+    draw_ellipse(start_pos, next_position, ellipse_width,
+                 color, ellipse_outline_width)
+    #pygame.draw.line(screen, color, start_pos, next_position, 2)
 
     if branchings > 0:
         new = stem_length * shrink_factor
@@ -74,8 +135,17 @@ class Biomorph:
     def create_children(self, n=8, save=False):
         children = []
         for child in range(n):
+
+            # limit to 3 branchings
+            if self.branchings > 2:
+                new_branchings = self.branchings + \
+                    pick_random([-1, 0, 0, 0, 0])
+            else:
+                new_branchings = self.branchings + \
+                    pick_random([-1, 0, 0, 0, +1])
+
             mutant = Biomorph(
-                self.branchings + pick_random([-1, 0, 0, 0, +1]),
+                new_branchings,
                 self.angle + math.radians(pick_random([-20, -10, 0, 10, 20])),
                 self.stem_length *
                 (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
@@ -94,7 +164,6 @@ class Biomorph:
             if save:
                 filename = f'{mutant.name}.pkl'
                 fp = os.path.join('biomorphs', filename)
-                print(fp)
                 #pickle.dump(mutant, open(fp, "wb"))
         return(children)
 
@@ -107,11 +176,6 @@ class Biomorph:
         squeeze_y = self.squeeze_y
         FractalTree(branchings, angle, stem_length, shrink_factor,
                     squeeze_x, squeeze_y, start_pos=start_pos)
-
-
-
-# for ch in children:
-# print(ch.genome())
 
 
 class Button():
@@ -150,25 +214,29 @@ class Button():
 
 def display_gen(screen, parent):
 
+    pygame.init()
+    pygame.display.set_caption("Fractal Tree")
+    screen = pygame.display.set_mode((1000, 1000))
+
     children = parent.create_children()
 
     buttons = [
         Button((0, 255, 0), pos1[0] - 75, pos1[1] +
-            20, 150, 50, children[0], 'child 1'),
+               20, 150, 50, children[0], 'child 1'),
         Button((0, 255, 0), pos2[0] - 75, pos2[1] +
-            20, 150, 50, children[1], 'child 2'),
+               20, 150, 50, children[1], 'child 2'),
         Button((0, 255, 0), pos3[0] - 75, pos3[1] +
-            20, 150, 50, children[2], 'child 3'),
+               20, 150, 50, children[2], 'child 3'),
         Button((0, 255, 0), pos4[0] - 75, pos4[1] +
-            20, 150, 50, children[3], 'child 4'),
+               20, 150, 50, children[3], 'child 4'),
         Button((0, 255, 0), pos6[0] - 75, pos6[1] +
-            20, 150, 50, children[4], 'child 5'),
+               20, 150, 50, children[4], 'child 5'),
         Button((0, 255, 0), pos7[0] - 75, pos7[1] +
-            20, 150, 50, children[5], 'child 6'),
+               20, 150, 50, children[5], 'child 6'),
         Button((0, 255, 0), pos8[0] - 75, pos8[1] +
-            20, 150, 50, children[6], 'child 7'),
+               20, 150, 50, children[6], 'child 7'),
         Button((0, 255, 0), pos9[0] - 75, pos9[1] +
-            20, 150, 50, children[7], 'child 8'),
+               20, 150, 50, children[7], 'child 8'),
     ]
 
     generation = len(parent.ancestors) - 1

@@ -70,4 +70,6 @@ while running:
     draw_ellipse((400, 600), (700, 280), 80, (255, 0, 0), 5)
     draw_ellipse((260, 190), (670, 440), 50, (0, 0, 255), 5)
 
+    draw_ellipse((160, 290), (370, 440), 20, (0, 255, 255), 5)
+
     pygame.display.update()

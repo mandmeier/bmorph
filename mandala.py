@@ -5,75 +5,131 @@ import math
 height, width = 1000, 1000
 
 
-def flower(width: int, color: tuple, edges: bool=False):
-    W, H = width, width
-    # create a flower surface with an alpha channel on which to draw
-    # the petals
-    flower = pygame.Surface((W, H), pygame.SRCALPHA, 32).convert_alpha()
-    R = flower.get_rect()
-    cx, cy = R.center
-    # assuming petal height should be half their width
-    petal_size = (width // 2, width // 4)
-    pw, ph = petal_size
-    radius = pw / 2
-    center_radius = width // 10
-    center_color = (255 - color[0], 255 - color[1], 255 - color[2])
+# def flower(width: int, color: tuple, edges: bool=False):
+#     W, H = width, width
+#     # create a flower surface with an alpha channel on which to draw
+#     # the petals
+#     flower = pygame.Surface((W, H), pygame.SRCALPHA, 32).convert_alpha()
+#     R = flower.get_rect()
+#     cx, cy = R.center
+#     # assuming petal height should be half their width
+#     petal_size = (width // 2, width // 4)
+#     pw, ph = petal_size
+#     radius = pw / 2
+#     center_radius = width // 10
+#     center_color = (255 - color[0], 255 - color[1], 255 - color[2])
 
-    def draw_petal(S, x, y, w, h, angle):
-        # Create surface for drawing an individual petal
-        surface = pygame.Surface((w, h), pygame.SRCALPHA, 32).convert_alpha()
-        # Draw the un-rotated petal
-        pygame.draw.ellipse(surface, color, (0, 0, w, h), 0)
-        if edges:
-            pygame.draw.ellipse(surface, (0, 0, 0), (0, 0, w, h), 1)
+#     def draw_petal(S, x, y, w, h, angle):
+#         # Create surface for drawing an individual petal
+#         surface = pygame.Surface((w, h), pygame.SRCALPHA, 32).convert_alpha()
+#         # Draw the un-rotated petal
+#         pygame.draw.ellipse(surface, color, (0, 0, w, h), 0)
+#         if edges:
+#             pygame.draw.ellipse(surface, (0, 0, 0), (0, 0, w, h), 1)
 
-        # Create a new surface with the petal rotated by angle
-        rot_surface = pygame.transform.rotate(surface, angle)
-        # Need center of rotated surface to blit (draw) the rotated
-        # petal at the given (x, y) coordinate
-        rcx, rcy = rot_surface.get_rect().center
-        # Draw the center of the rotated petal at (x, y)
-        S.blit(rot_surface, (x - rcx, y - rcy))
+#         # Create a new surface with the petal rotated by angle
+#         rot_surface = pygame.transform.rotate(surface, angle)
+#         # Need center of rotated surface to blit (draw) the rotated
+#         # petal at the given (x, y) coordinate
+#         rcx, rcy = rot_surface.get_rect().center
+#         # Draw the center of the rotated petal at (x, y)
+#         S.blit(rot_surface, (x - rcx, y - rcy))
 
-    # Petals are drawn at diagonals first, then the horizontal petals,
-    # then the vertical petals
-    angles = [
-        45, 135, 225, 315,      # diagonals
-        0, 180,                 # horizontal
-        90, 270                 # vertical
-    ]
-    for a in angles:
-        # placing petal centers onto circle of radius (petal_width/2)
-        x, y = map(int, (
-            radius * math.cos(math.radians(a)), radius *
-            math.sin(math.radians(a))
-        ))
-        draw_petal(flower, cx + x, cy + y, pw, ph, -a)
-    # draw flower center (don't remember what it's called)
-    pygame.draw.circle(flower, center_color, (cx, cx), center_radius)
-    if edges:
-        pygame.draw.circle(flower, BLACK, (cx, cx), center_radius, 1)
+#     # Petals are drawn at diagonals first, then the horizontal petals,
+#     # then the vertical petals
+#     angles = [
+#         45, 135, 225, 315,      # diagonals
+#         0, 180,                 # horizontal
+#         90, 270                 # vertical
+#     ]
+#     for a in angles:
+#         # placing petal centers onto circle of radius (petal_width/2)
+#         x, y = map(int, (
+#             radius * math.cos(math.radians(a)), radius *
+#             math.sin(math.radians(a))
+#         ))
+#         draw_petal(flower, cx + x, cy + y, pw, ph, -a)
+#     # draw flower center (don't remember what it's called)
+#     pygame.draw.circle(flower, center_color, (cx, cx), center_radius)
+#     if edges:
+#         pygame.draw.circle(flower, BLACK, (cx, cx), center_radius, 1)
 
-    def draw_flower(S, x, y, flower=flower):
-        S.blit(flower, (x - cx, y - cy))
-    return draw_flower
+#     def draw_flower(S, x, y, flower=flower):
+#         S.blit(flower, (x - cx, y - cy))
+#     return draw_flower
 
 
-def draw_petal(S, x, y, w, h, angle=0, edges=False):
-    # Create surface for drawing an individual petal
-    surface = pygame.Surface((w, h), pygame.SRCALPHA, 32).convert_alpha()
-    # Draw the un-rotated petal
-    #pygame.draw.ellipse(surface, (0, 255, 0), (0, 0, w, h), 0)
-    if edges:
-        pygame.draw.ellipse(surface, (0, 0, 0), (0, 0, w, h), 2)
+# def draw_petal(S, x, y, w, h, angle=0, edges=False):
+#     # Create surface for drawing an individual petal
+#     surface = pygame.Surface((w, h), pygame.SRCALPHA, 32).convert_alpha()
+#     # Draw the un-rotated petal
+#     #pygame.draw.ellipse(surface, (0, 255, 0), (0, 0, w, h), 0)
+#     if edges:
+#         pygame.draw.ellipse(surface, (0, 0, 0), (0, 0, w, h), 2)
 
-    # Create a new surface with the petal rotated by angle
-    rot_surface = pygame.transform.rotate(surface, angle)
-    # Need center of rotated surface to blit (draw) the rotated
-    # petal at the given (x, y) coordinate
-    rcx, rcy = rot_surface.get_rect().center
-    # Draw the center of the rotated petal at (x, y)
-    S.blit(rot_surface, (x - rcx, y - rcy))
+#     # Create a new surface with the petal rotated by angle
+#     rot_surface = pygame.transform.rotate(surface, angle)
+#     # Need center of rotated surface to blit (draw) the rotated
+#     # petal at the given (x, y) coordinate
+#     rcx, rcy = rot_surface.get_rect().center
+#     # Draw the center of the rotated petal at (x, y)
+#     S.blit(rot_surface, (x - rcx, y - rcy))
+
+def draw_ellipse(A, B, width, color, line):
+    """
+    draws ellipse between two points
+    A = start point (x,y)
+    B = end point (x,y)
+    width in pixel
+    color (r,g,b)
+    line thickness int, if line=0 fill ellipse
+    """
+    # point coordinates
+    xA, yA = A[0], A[1]
+    xB, yB = B[0], B[1]
+    # calculate ellipse height, distance between A and B
+    AB = math.sqrt((xB - xA)**2 + (yB - yA)**2)
+
+    # difference between corner point coord and ellipse endpoint
+    def sp(theta):
+        return abs((width / 2 * math.sin(math.radians(theta))))
+
+    def cp(theta):
+        return abs((width / 2 * math.cos(math.radians(theta))))
+
+    if xB >= xA and yB < yA:
+        # NE quadrant
+        theta = math.degrees(math.asin((yA - yB) / AB))
+        xP = int(xA - sp(theta))
+        yP = int(yB - cp(theta))
+    elif xB < xA and yB <= yA:
+        # NW
+        theta = math.degrees(math.asin((yB - yA) / AB))
+        xP = int(xB - sp(theta))
+        yP = int(yB - cp(theta))
+    elif xB <= xA and yB > yA:
+        # SW
+        theta = math.degrees(math.asin((yB - yA) / AB))
+        xP = int(xB - sp(theta))
+        yP = int(yA - cp(theta))
+    else:
+        # SE
+        theta = math.degrees(math.asin((yA - yB) / AB))
+        xP = int(xA - sp(theta))
+        yP = int(yA - cp(theta))
+
+    # create surface for ellipse
+    ellipse_surface = pygame.Surface((AB, width), pygame.SRCALPHA)
+    # draw surface onto ellipse
+    if width < 2 * line:
+        width = 2 * line
+    if AB < 2 * line:
+        AB = 2 * line
+    pygame.draw.ellipse(ellipse_surface, color, (0, 0, AB, width), line)
+    # rotate ellipse
+    ellipse = pygame.transform.rotate(ellipse_surface, theta)
+    # blit ellipse onto screen
+    screen.blit(ellipse, (xP, yP))
 
 
 def draw_fractal_ngon(Surface, color, n, radius, position, direction=math.pi / 2, branchings=2, shrink_factor=0.5):
@@ -156,8 +212,13 @@ def FractalTree(screen, start_pos, radius, direction, i, n, shrink_factor=0.5, c
     next_position = (x + angle_x, y + angle_y)
     #pygame.draw.line(screen, color, start_pos, next_position, 2)
 
-    draw_petal(screen, next_position[0], next_position[1],
-               radius, 2 * radius, angle=i * 720 / n, edges=True)
+    # draw_petal(screen, next_position[0], next_position[1],
+    #            radius, 2 * radius, angle=i * 720 / n, edges=True)
+
+    ellipse_outline_width = 2
+    ellipse_width = radius / 3
+    draw_ellipse(start_pos, next_position, ellipse_width,
+                 color, ellipse_outline_width)
 
     if branchings > 0:
         new_radius = radius * shrink_factor
@@ -211,7 +272,7 @@ def draw_figure():
 
         #draw_ngon(screen, (0, 0, 0), 6, 200, (500, 500))
         #draw_mandala(screen, (0, 0, 0), 6, 200, (500, 500))
-        draw_fractal_tree(screen, (500, 500), 100, 6)
+        draw_fractal_tree(screen, (500, 500), 100, 5)
 
         pygame.display.update()
 
