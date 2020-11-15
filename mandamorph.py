@@ -85,7 +85,13 @@ def draw_ellipse(A, B, width, color, line):
     screen.blit(ellipse, (xP, yP))
 
 
-def FractalTree(screen, branchings, angles, start_pos, branch_lengths, branch_widths, direction, i, n, color=(0, 0, 0)):
+globalvar = "global test"
+
+
+def FractalTree(screen, branchings, angles, start_pos, branch_lengths, branch_widths, direction, i, n, origin, color=(0, 0, 0)):
+    # global globalvar
+    # globalvar = "changed global"
+    # print(globalvar)
     radius = branch_lengths[branchings]
     ellipse_width = branch_widths[branchings]
     yangle = angles[branchings]
@@ -103,21 +109,38 @@ def FractalTree(screen, branchings, angles, start_pos, branch_lengths, branch_wi
 
     if branchings > 0:
         FractalTree(screen, branchings - 1, angles, next_position,
-                    branch_lengths, branch_widths, direction - yangle, i, n)
+                    branch_lengths, branch_widths, direction - yangle, i, n, origin)
         FractalTree(screen, branchings - 1, angles, next_position,
-                    branch_lengths, branch_widths, direction + yangle, i, n)
+                    branch_lengths, branch_widths, direction + yangle, i, n, origin)
+
+    dist = math.sqrt((next_position[0] - origin[0])
+                     ** 2 + (next_position[0] - origin[0])**2)
+    return(dist)
 
 
-def draw_fractal_tree(screen, branchings, angles, branch_lengths, branch_widths, start_pos, n):
+def draw_fractal_tree(screen, branchings, angles, branch_lengths, branch_widths, start_pos, n, origin):
     pi2 = 2 * math.pi
+    figure_radius = 0
     for i in range(0, n):
         direction = i * pi2 / n - math.pi / 2
-        FractalTree(screen, branchings, angles,
-                    start_pos, branch_lengths, branch_widths, direction, i, n)
+        dist = FractalTree(screen, branchings, angles,
+                           start_pos, branch_lengths, branch_widths, direction, i, n, origin)
+        if figure_radius < dist:
+            figure_radius = dist
+
+    return(figure_radius)
 
 
 def pick_random(lst):
     return(lst[random.randrange(len(lst))])
+
+
+def do_mutate(prob):
+    rand = pick_random(range(0, prob))
+    if rand == 0:
+        return True
+    else:
+        return False
 
 
 class Biomorph:
@@ -131,6 +154,7 @@ class Biomorph:
         self.branch_lengths = branch_lengths
         self.branch_widths = branch_widths
         self.symmetry = symmetry
+        self.figure_radius = 0
 
     def __str__(self):
         return(self.name)
@@ -156,58 +180,39 @@ class Biomorph:
                 new_branchings = self.branchings + \
                     pick_random([-1, 0, 0, 0, +1])
 
-            new_angles = [
-                self.angles[0] +
-                math.radians(pick_random([-20, -10, 0, 10, 20])),
-                self.angles[1] +
-                math.radians(pick_random([-20, -10, 0, 10, 20])),
-                self.angles[2] +
-                math.radians(pick_random([-20, -10, 0, 10, 20])),
-                self.angles[3] +
-                math.radians(pick_random([-20, -10, 0, 10, 20]))
-            ]
+            new_angles = []
+            for a in self.angles:
+                if do_mutate(4):
+                    newa = a + math.radians(pick_random([-10, -5, 5, 10, ]))
+                    new_angles.append(newa)
+                else:
+                    new_angles.append(a)
 
             new_branch_lengths = []
             for b in self.branch_lengths:
-                if b <= 2:
-                    newb = b * (1 + pick_random([0, 0, 0, 0.05, 0.1]))
-                elif b >= 100:
-                    newb = b * (1 + pick_random([-0.1, -0.05, 0, 0, 0]))
+                if do_mutate(4):
+                    if b >= 100:
+                        newb = pick_random([100, 95, 90])
+                    else:
+                        newb = b + pick_random([-10, -5, 5, 10])
+                    if newb <= 2:
+                        newb = pick_random([2, 5, 10])
+                    new_branch_lengths.append(newb)
                 else:
-                    newb = b * (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1]))
-                new_branch_lengths.append(newb)
-
-            # new_branch_lengths = [
-            #     self.branch_lengths[0] *
-            #     (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
-            #     self.branch_lengths[1] *
-            #     (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
-            #     self.branch_lengths[2] *
-            #     (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
-            #     self.branch_lengths[3] *
-            #     (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
-            # ]
+                    new_branch_lengths.append(b)
 
             new_branch_widths = []
             for w in self.branch_widths:
-                if w <= 2:
-                    neww = w * (1 + pick_random([0, 0, 0, 0.05, 0.1]))
-                elif w >= 100:
-                    neww = w * (1 + pick_random([-0.1, -0.05, 0, 0, 0]))
+                if do_mutate(4):
+                    if w >= 100:
+                        neww = pick_random([100, 95, 90])
+                    else:
+                        neww = w + pick_random([-10, -5, 5, 10])
+                    if neww <= 2:
+                        neww = pick_random([2, 5, 10])
+                    new_branch_widths.append(neww)
                 else:
-                    neww = w * (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1]))
-                new_branch_widths.append(neww)
-
-            # new_branch_widths = [
-            #     self.branch_widths[0] *
-            #     (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
-            #     self.branch_widths[1] *
-            #     (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
-            #     self.branch_widths[2] *
-            #     (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
-            #     self.branch_widths[3] *
-            #     (1 + pick_random([-0.1, -0.05, 0, 0.05, 0.1])),
-            # ]
+                    new_branch_widths.append(w)
 
             if self.symmetry <= 3:
                 new_symmetry = self.symmetry + pick_random([0, 0, 0, 0, 0, +1])
@@ -243,8 +248,10 @@ class Biomorph:
         branch_widths = self.branch_widths
         symmetry = self.symmetry
 
-        draw_fractal_tree(screen, branchings, angles, branch_lengths, branch_widths,
-                          start_pos, symmetry)
+        figure_radius = draw_fractal_tree(screen, branchings, angles, branch_lengths, branch_widths,
+                                          start_pos, symmetry, start_pos)
+
+        self.figure_radius = figure_radius
 
 
 class Button():
@@ -283,15 +290,11 @@ class Button():
 
 def display_gen(screen, parent):
 
-    # pygame.init()
-    # pygame.display.set_caption("Fractal Tree")
-    # screen = pygame.display.set_mode((height, width))
-
     children = parent.create_children()
 
     buttons = [
         Button((0, 255, 0), pos1[0] - 10, pos1[1] +
-               130, 20, 20, children[0], '1'),
+               130, 50, 30, children[0], str(children[0].figure_radius)),
         Button((0, 255, 0), pos2[0] - 10, pos2[1] +
                130, 20, 20, children[1], '2'),
         Button((0, 255, 0), pos3[0] - 10, pos3[1] +
