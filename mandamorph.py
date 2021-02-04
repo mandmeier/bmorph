@@ -294,7 +294,7 @@ def display_gen(screen, parent):
 
     buttons = [
         Button((0, 255, 0), pos1[0] - 10, pos1[1] +
-               130, 50, 30, children[0], str(children[0].figure_radius)),
+               130, 20, 20, children[0], str(children[0].figure_radius)),
         Button((0, 255, 0), pos2[0] - 10, pos2[1] +
                130, 20, 20, children[1], '2'),
         Button((0, 255, 0), pos3[0] - 10, pos3[1] +
